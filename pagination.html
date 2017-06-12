@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>Examples</title>
+<meta name="description" content="">
+<meta name="keywords" content="">
+<link href="" rel="stylesheet">
+<style>
+/*body{background-color: rgba(252,221,100,0)}*/
+    *{padding: 0;margin: 0;}
+	.paging a{background-color: #60BDDE;display: inline-block;padding: 4px 12px;text-decoration: none;color: #fff;/*border-radius: 3px;*/font-family: Arial;margin: 4px ;border-radius: 3px;}
+	.gallery img{max-width: 100%;}
+	.gallery li{float: left;list-style-type: none;width: 33.33%;overflow: hidden;height: 100%;}
+	*:before{display: table;clear: both;content: ""}
+	*:after{display: table;clear: both;content: ""}
+	.gallery{width: 700px;margin: 0 auto;}
+</style>
+</head>
+<body>
+	<ul class="gallery" id="gallery">
+		<li><img src="images/1.jpg" alt="">1</li>
+        <li><img src="images/2.jpg" alt="">2</li>
+        <li><img src="images/1.jpg" alt="">3</li>
+        <li><img src="images/2.jpg" alt="">4</li>
+        <li><img src="images/1.jpg" alt="">5</li>
+        <li><img src="images/2.jpg" alt="">6</li>
+        <li><img src="images/3.jpg" alt="">7</li>
+        <li><img src="images/2.jpg" alt="">8</li>
+        <li><img src="images/1.jpg" alt="">9</li>
+
+        <li><img src="images/2.jpg" alt="">10</li>
+        <li><img src="images/3.jpg" alt="">11</li>
+        <li><img src="images/1.jpg" alt="">12</li>
+
+        <!-- <li><img src="images/1.jpg" alt="">13</li>
+        <li><img src="images/3.jpg" alt="">14</li>
+        <li><img src="images/1.jpg" alt="">15</li> -->
+	</ul>
+
+    <div class="paging" id="paging"></div>
+    <script>
+    	/*
+        v8:
+        去注释
+        切换页面的效果，运动框架
+    	 */
+    	
+    	function Pagination(container,item,limit){
+    		this.box=document.getElementById(container);
+    		this.items=this.box.getElementsByTagName(item);
+    		this.len=this.items.length;
+    		this.limit=limit;
+            this.element=document.getElementById('paging');
+            this.pages=this.element.getElementsByTagName('a');
+            this.Index=0;
+
+    		this._dataArr=this.dataArr();
+    	}
+
+    	Pagination.prototype={
+    		init:function(){
+    			this.createPaging();
+    			var page=document.getElementById('paging');
+		    	var pages=page.getElementsByTagName('a');
+		        var _this=this;
+		    	for(var y=0;y<pages.length;y++){
+		    		if(!isNaN(pages[y].innerHTML)){
+		    			pages[y].id=y;
+		    			pages[y].onclick=function(e){
+		    				e=e||window.event;
+		    				e.preventDefault();
+		    				_this.specify(this.id-2);
+		                    _this.Index=this.id-2;
+		    			}
+						pages[1].onclick=function(){
+			    			_this.prev();
+			    		}
+		                document.getElementById('next').onclick=function(){
+		                    _this.next();
+		                }
+		                document.getElementById('first').onclick=function(){
+		                    _this.first();
+		                }
+		                document.getElementById('last').onclick=function(){
+		                    _this.last();
+		                }
+		    		}
+		    	}
+    			this.onld();
+    		},
+    		createPaging:function(){
+                var paging=document.getElementById('paging');
+                var str='';
+                var howmany=Math.ceil(this.len/this.limit);
+                for(var i=1;i<=howmany;i++){
+                    str += '<a href="#">'+i+'</a>';
+                }
+                paging.innerHTML='<a href="#" id="first">the first page</a><a href="#" id="prev">prev</a>'+str+'<a href="#" id="next">next</a><a href="#" id="last">the last one</a>';
+                for(var i=0;i<paging.getElementsByTagName('a').length;i++){
+                }
+                return paging.getElementsByTagName('a');
+            },
+            dataArr:function(){
+	      		var howmanypages=Math.ceil(this.len/this.limit);
+	        	var arrdata=[];
+	        	var objdata={};
+	            for(var i=0;i<howmanypages;i++){
+	            	arrdata.push(i);
+	            	arrdata[i]=[];
+	        		for(var j=i;j<this.len;j++){
+	                    if(Math.floor(j/this.limit)===i){
+	                    	arrdata[i].push(this.items[j].innerHTML);
+	                    	objdata.imgUrl=arrdata;
+	                    }
+	                }
+	            }
+	            console.log(objdata);
+	            return objdata;
+	        },
+            render:function(which){
+        		this.box.innerHTML="";
+            	for(var i=0;i<this.limit;i++){
+            		this.box.innerHTML+='<li>'+this._dataArr.imgUrl[which][i]+'</li>';
+            	}
+            },
+            updown:function(index){
+                index==undefined && (index=this.Index);
+                if(index<0){
+                    index=0;
+                    alert('已是第一页')
+                }
+                if(index>this.total()-1){
+                    alert('已是最后一页');
+                    index=this.total()-1;
+                }
+                this.render(index);
+            },
+            prev:function(){
+            	if(this.Index>this.total()-1){
+            		this.Index=this.total()-1;
+            	}
+                this.updown(--this.Index);
+            },
+            next:function(){
+            	if(this.Index<0){
+            		this.Index=0;
+            	}
+                this.updown(++this.Index);
+            },
+            first:function(){
+                this.render(0);
+                this.Index=0;
+            },
+            total:function(){
+                return this.pages.length-4;
+            },
+            last:function(){
+                var t=this.total()-1;
+                this.render(t);
+                this.Index=t;
+            },
+            onld:function(){
+            	this.render(0);
+            },
+            specify:function(which){
+            	this.render(which);
+            }
+
+    	}
+    	var addClass=function(json,elem){
+            for(var key in json){
+                elem.style[key]=json[key];
+            }
+        }
+
+    	new Pagination('gallery','li',3).init();
+    </script>
+</body>
+</html>
